@@ -1,0 +1,32 @@
+{
+  "name": "transition-property",
+  "version": "1.0.0",
+  "description": "transition property detect",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/chemzqm/transition-property.git"
+  },
+  "keywords": [
+    "transition",
+    "property"
+  ],
+  "author": "chemzqm@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/chemzqm/transition-property/issues"
+  },
+  "homepage": "https://github.com/chemzqm/transition-property#readme",
+  "devDependencies": {
+    "mocha": "^2.3.3",
+    "mocha-loader": "^0.7.1",
+    "webpack": "^1.12.3",
+    "webpack-dev-server": "^1.12.1"
+  }
+}
