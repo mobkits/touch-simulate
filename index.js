@@ -351,19 +351,22 @@ function getCoordinate(el, position) {
   var rect = el.getBoundingClientRect()
   var x = rect.left
   var y = rect.top
+  var delta = 3
   switch (position) {
     case 't':
       x = x + rect.width/2
+      y = y + delta
       break;
     case 'b':
       x = x + rect.width/2
-      y = y + rect.height
+      y = y + rect.height - delta
       break;
     case 'l':
       y = y + rect.height/2
+      x = x + delta
       break;
     case 'r':
-      x = x + rect.widht
+      x = x + rect.widht - delta
       y = y + rect.height/2
       break;
     default:

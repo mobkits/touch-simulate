@@ -52,7 +52,7 @@ touch.moveRight(150)
 #### TouchSimulate(el, option)
 
 Create TouchSimulate instance with element and options
-* `option.speed` set speed
+* `option.speed` set speed of `px/s` default 40
 * `option.fixTarget` use the real target at the point instead of `el` to dispatch the event
 * `option.point` show a transparent point at the screen, can not use with `fixTarget`
 * `option.ease` define a [ease function](https://github.com/component/ease) for the movemonent, default `linear`
@@ -64,7 +64,6 @@ Set the speed to number
 #### .ease(string)
 
 Set the ease function name
-
 
 #### .start([position])
 
