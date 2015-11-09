@@ -19,7 +19,7 @@ function assign(to, from) {
   return to
 }
 
-function createEvent(target, type, x, y) {
+function createEvent(type, x, y) {
   var e = new UIEvent(type, {
       bubbles: true,
       cancelable: false,
@@ -33,8 +33,7 @@ function createEvent(target, type, x, y) {
     clientX: x,
     clientY: y,
     pageX: x + document.body.scrollLeft,
-    pageY: y + document.body.scrollTop,
-    target: target
+    pageY: y + document.body.scrollTop
   })
   e.touches = [touch]
   return e
@@ -66,7 +65,8 @@ function TouchSimulate(el, opts) {
   this.opts = opts || {}
   this._speed = opts.speed || 40
   this._ease = opts.ease || 'linear'
-  if (opts.point)  {
+  this.fixTarget = opts.fixTarget
+  if (opts.point && !this.fixTarget)  {
     this.createPoint()
     var self = this
     this.on('start', function (x, y) {
@@ -289,8 +289,14 @@ TouchSimulate.prototype.getDuration = function (start, end) {
  * @api public
  */
 TouchSimulate.prototype.fireEvent = function (type, x, y) {
-  var e = createEvent(this.el, type, x, y)
-  this.el.dispatchEvent(e)
+  var e = createEvent(type, x, y)
+  var target
+  if (this.fixTarget) {
+    target = document.elementFromPoint(x, y)
+  } else {
+    target = this.el
+  }
+  target.dispatchEvent(e)
   return e
 }
 

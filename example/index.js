@@ -7,7 +7,7 @@ var m = moveable(el)
 
 var touch = new TouchSimulate(el, {
   speed: 80,
-  point: true
+  fixTarget: true
 })
 
 function run() {
@@ -84,3 +84,4 @@ function moveable(node) {
     }
   }
 }
+
