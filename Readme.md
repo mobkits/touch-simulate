@@ -1,8 +1,8 @@
 # Touch-simulate
 
-  Simulate touch event(A fake one with pageX, pageY, clientX, clientY available) even at desktop browser for testing.
+  [![Build Status](https://secure.travis-ci.org/chemzqm/touch-simulate.svg)](http://travis-ci.org/chemzqm/touch-simulate)
 
-  TODO: test
+  Simulate touch event(A fake one with pageX, pageY, clientX, clientY available) even at desktop browser for testing.
 
 ## Features
 
