@@ -61,8 +61,10 @@ function customEvent(name) {
  * @api public
  */
 function TouchSimulate(el, opts) {
+  if (!(this instanceof TouchSimulate)) return new TouchSimulate(el, opts)
   this.el = el
-  this.opts = opts || {}
+  opts = opts || {}
+  this.opts = opts
   this._speed = opts.speed || 40
   this._ease = opts.ease || 'linear'
   this.fixTarget = opts.fixTarget
