@@ -36,36 +36,47 @@
 <span class="keyword" style="color:#859900;">var</span> transform = detect.transform
 <span class="keyword" style="color:#859900;">var</span> TouchSimulate = require(<span class="string" style="color:#2aa198;">'..'</span>)
 <span class="keyword" style="color:#859900;">var</span> el = document.getElementById(<span class="string" style="color:#2aa198;">'demo'</span>)
-moveable(el)
+<span class="keyword" style="color:#859900;">var</span> m = moveable(el)
 
 <span class="keyword" style="color:#859900;">var</span> touch = <span class="keyword" style="color:#859900;">new</span> TouchSimulate(el, {
   speed: <span class="number" style="color:#2aa198;">80</span>,
   point: <span class="literal">true</span>
 })
 
-touch.start()
-touch.moveRight(<span class="number" style="color:#2aa198;">150</span>)
-.then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
-  <span class="keyword" style="color:#859900;">return</span> touch.wait(<span class="number" style="color:#2aa198;">1000</span>)
-})
-.then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
-  <span class="keyword" style="color:#859900;">return</span> touch.moveDown(<span class="number" style="color:#2aa198;">150</span>)
-})
-.then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
-  <span class="keyword" style="color:#859900;">return</span> touch.wait(<span class="number" style="color:#2aa198;">1000</span>)
-})
-.then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
-  <span class="keyword" style="color:#859900;">return</span> touch.moveLeft(<span class="number" style="color:#2aa198;">150</span>)
-})
-.then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
-  <span class="keyword" style="color:#859900;">return</span> touch.wait(<span class="number" style="color:#2aa198;">1000</span>)
-})
-.then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
-  <span class="keyword" style="color:#859900;">return</span> touch.moveUp(<span class="number" style="color:#2aa198;">150</span>)
-})
-.then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
-  <span class="keyword" style="color:#859900;">return</span> touch.move(Math.PI/<span class="number" style="color:#2aa198;">4</span>, <span class="number" style="color:#2aa198;">150</span>)
-})
+<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="title" style="color:#268bd2;">run</span><span class="params">()</span> {</span>
+  touch.start()
+  touch.moveRight(<span class="number" style="color:#2aa198;">150</span>)
+  .then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
+    <span class="keyword" style="color:#859900;">return</span> touch.wait(<span class="number" style="color:#2aa198;">1000</span>)
+  })
+  .then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
+    <span class="keyword" style="color:#859900;">return</span> touch.moveDown(<span class="number" style="color:#2aa198;">150</span>)
+  })
+  .then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
+    <span class="keyword" style="color:#859900;">return</span> touch.wait(<span class="number" style="color:#2aa198;">1000</span>)
+  })
+  .then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
+    <span class="keyword" style="color:#859900;">return</span> touch.moveLeft(<span class="number" style="color:#2aa198;">150</span>)
+  })
+  .then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
+    <span class="keyword" style="color:#859900;">return</span> touch.wait(<span class="number" style="color:#2aa198;">1000</span>)
+  })
+  .then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
+    <span class="keyword" style="color:#859900;">return</span> touch.moveUp(<span class="number" style="color:#2aa198;">150</span>)
+  })
+  .then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
+    <span class="keyword" style="color:#859900;">return</span> touch.move(Math.PI/<span class="number" style="color:#2aa198;">4</span>, <span class="number" style="color:#2aa198;">150</span>)
+  })
+  .then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
+    m.reset()
+    <span class="keyword" style="color:#859900;">return</span> touch.wait(<span class="number" style="color:#2aa198;">1000</span>)
+  })
+  .then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
+    run()
+  })
+}
+
+run()
 
 <span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="title" style="color:#268bd2;">moveable</span><span class="params">(node)</span> {</span>
   <span class="keyword" style="color:#859900;">var</span> last
@@ -74,15 +85,15 @@ touch.moveRight(<span class="number" style="color:#2aa198;">150</span>)
   node.addEventListener(<span class="string" style="color:#2aa198;">'touchstart'</span>, <span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">(e)</span> {</span>
     <span class="keyword" style="color:#859900;">var</span> t = e.touches[<span class="number" style="color:#2aa198;">0</span>]
     last = {
-      x: t.clientX,
-      y: t.clientY
+      x: t.pageX,
+      y: t.pageY
     }
   }, <span class="literal">false</span>)
 
   node.addEventListener(<span class="string" style="color:#2aa198;">'touchmove'</span>, <span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">(e)</span> {</span>
     <span class="keyword" style="color:#859900;">var</span> t = e.touches[<span class="number" style="color:#2aa198;">0</span>]
-    x = x + t.clientX - last.x
-    y = y + t.clientY - last.y
+    x = x + t.pageX - last.x
+    y = y + t.pageY - last.y
     <span class="keyword" style="color:#859900;">var</span> s = node.style
     <span class="keyword" style="color:#859900;">if</span> (has3d) {
       s[transform] = <span class="string" style="color:#2aa198;">'translate3d('</span> + x + <span class="string" style="color:#2aa198;">'px,'</span> + y + <span class="string" style="color:#2aa198;">'px, 0)'</span>
@@ -90,14 +101,21 @@ touch.moveRight(<span class="number" style="color:#2aa198;">150</span>)
       s[transform] = <span class="string" style="color:#2aa198;">'translateX('</span> + x + <span class="string" style="color:#2aa198;">'px),translateY('</span> + y + <span class="string" style="color:#2aa198;">'px)'</span>
     }
     last = {
-      x: t.clientX,
-      y: t.clientY
+      x: t.pageX,
+      y: t.pageY
     }
   }, <span class="literal">false</span>)
 
   node.addEventListener(<span class="string" style="color:#2aa198;">'touchend'</span>, <span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">(e)</span> {</span>
-    <span class="keyword" style="color:#859900;">var</span> t =  e.touches[<span class="number" style="color:#2aa198;">0</span>]
   })
+
+  <span class="keyword" style="color:#859900;">return</span> {
+    reset: <span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
+      x = <span class="number" style="color:#2aa198;">0</span>,
+      y = <span class="number" style="color:#2aa198;">0</span>,
+      node.style[transform] = <span class="string" style="color:#2aa198;">''</span>
+    }
+  }
 }</code></pre>
     </div>
     <script src="./bundle.js" type="text/javascript" charset="utf-8"></script>
