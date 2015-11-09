@@ -7,7 +7,8 @@
 ## Features
 
 * Automatic emit touchmove when moving
-* Corrent `e.clientX` and `e.clientY`
+* Corrent `e.clientX`, `e.clientY` and many others
+* Confige movemoment by speed and ease function
 * Promise based
 
 ## Install
