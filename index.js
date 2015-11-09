@@ -12,25 +12,48 @@ var uid = (function () {
   }
 })()
 
+function assign(to, from) {
+  Object.keys(from).forEach(function (k) {
+    to[k] = from[k]
+  })
+  return to
+}
+
 function createEvent(target, type, x, y) {
   var e = new UIEvent(type, {
       bubbles: true,
       cancelable: false,
       detail: 1
   })
-  e.touches = [{
+  var touch = customEvent('touch')
+  assign(touch, {
     identifier: uid(),
     screenX: x,
     screenY: y,
     clientX: x,
     clientY: y,
     pageX: x + document.body.scrollLeft,
-    pageY: y + document.body.scrolltop,
+    pageY: y + document.body.scrollTop,
     target: target
-  }]
+  })
+  e.touches = [touch]
   return e
 }
 
+function customEvent(name) {
+  var e
+  try {
+    e = new CustomEvent(name)
+  } catch(error) {
+    try {
+      e = document.createEvent('CustomEvent')
+      e.initCustomEvent(name, false, false, 0)
+    } catch(err) {
+      return
+    }
+  }
+  return e
+}
 /**
  * Construct TouchSimulate with dispatch element and options
  *
@@ -302,8 +325,8 @@ TouchSimulate.prototype.showPoint = function () {
 TouchSimulate.prototype.movePoint = function (x, y) {
   var p = this.point
   var s = p.style
-  x = x - Number(p.dataset.x)
-  y = y - Number(p.dataset.y)
+  x = x - Number(p.dataset.x) + document.body.scrollLeft
+  y = y - Number(p.dataset.y) + document.body.scrollTop
   if (has3d) {
     s[transform] = 'translate3d(' + x + 'px,' + y + 'px, 0)'
   } else {
