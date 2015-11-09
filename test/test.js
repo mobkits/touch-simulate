@@ -1,9 +1,9 @@
-/*global describe, it*/
+/*global describe, it, beforeEach, afterEach*/
 var assert = require('assert')
-var prop = require('..')
+var Touch = require('..')
 
-describe('transition-property', function() {
-  it('should be transition', function () {
-    assert.equal(prop, 'transition')
+describe('Touch Simulate', function() {
+  it('', function () {
+    
   })
 })

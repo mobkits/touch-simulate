@@ -1,5 +1,5 @@
 // Karma configuration
-// npm i karma karma-cli karma-firefox-launcher karma-mocha karma-webpack karma-wrap-preprocessor mocha --save-dev
+// npm i karma karma-cli karma-firefox-launcher karma-mocha karma-webpack  mocha --save-dev
 // node_modules/.bin/karma start --single-run
 module.exports = function(config) {
   config.set({

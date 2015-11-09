@@ -1,20 +1,347 @@
-var styles = [
-  'transition',
-  'webkitTransition',
-  'MozTransition',
-  'OTransition',
-  'msTransition'
-]
+var detect = require('prop-detect')
+var raf = require('raf')
+var Tween = require('tween')
+var Emitter = require('emitter')
+var has3d = detect.has3d
+var transform = detect.transform
 
-var el = document.createElement('p')
-var style
+var uid = (function () {
+  var id = 1
+  return function () {
+    return id++
+  }
+})()
 
-for (var i = 0; i < styles.length; i++) {
-  if (null != el.style[styles[i]]) {
-    style = styles[i]
-    break
+function createEvent(target, type, x, y) {
+  var e = new UIEvent(type, {
+      bubbles: true,
+      cancelable: false,
+      detail: 1
+  })
+  e.touches = [{
+    identifier: uid(),
+    screenX: x,
+    screenY: y,
+    clientX: x,
+    clientY: y,
+    pageX: x + document.body.scrollLeft,
+    pageY: y + document.body.scrolltop,
+    target: target
+  }]
+  return e
+}
+
+/**
+ * Construct TouchSimulate with dispatch element and options
+ *
+ * @param  {Element}  el
+ * @param {Object} opts
+ * @api public
+ */
+function TouchSimulate(el, opts) {
+  this.el = el
+  this.opts = opts || {}
+  this._speed = opts.speed || 40
+  this._ease = opts.ease || 'linear'
+  if (opts.point)  {
+    this.createPoint()
+    var self = this
+    this.on('start', function (x, y) {
+      self.showPoint()
+      self.movePoint(x, y)
+    })
+    this.on('end', function () {
+      self.hidePoint()
+    })
+    this.on('move', function (x, y) {
+      self.movePoint(x, y)
+    })
   }
 }
-el = null
 
-module.exports = style
+Emitter(TouchSimulate.prototype)
+
+TouchSimulate.prototype.speed = function (n) {
+  this._speed = n
+  return this
+}
+
+TouchSimulate.prototype.ease = function (ease) {
+  this._ease = ease
+  return this
+}
+
+
+TouchSimulate.prototype.start = function (pos) {
+  if (this.moving) throw new Error('It\'s moving, can not start')
+  this.started = true
+  var cor = getCoordinate(this.el, pos)
+  var x = cor.x
+  var y = cor.y
+  this.clientX = x
+  this.clientY = y
+  this.fireEvent('touchstart', x, y)
+  this.emit('start', x, y)
+  return this
+}
+
+/**
+ * Move up
+ *
+ * @param {Number} distance
+ * @return {Promise}
+ * @api public
+ */
+TouchSimulate.prototype.moveUp = function (distance) {
+  var a = Math.PI*1.5
+  return this.move(a, distance)
+}
+
+/**
+ * Move down
+ *
+ * @param {Number} distance
+ * @return {Promise}
+ * @api public
+ */
+TouchSimulate.prototype.moveDown = function (distance) {
+  var a = Math.PI/2
+  return this.move(a, distance)
+}
+
+/**
+ * Move left
+ *
+ * @param {Number} distance
+ * @return {Promise}
+ * @api public
+ */
+TouchSimulate.prototype.moveLeft = function (distance) {
+  var a = Math.PI
+  return this.move(a, distance)
+}
+
+/**
+ * Move right
+ *
+ * @param {Number} distance
+ * @return {Promise}
+ * @api public
+ */
+TouchSimulate.prototype.moveRight = function (distance) {
+  var a = 0
+  return this.move(a, distance)
+}
+
+/**
+ * Move to the position
+ *
+ * @param {Number} x
+ * @param {Number} y
+ * @return {Promise}
+ * @api public
+ */
+TouchSimulate.prototype.moveTo = function (x, y) {
+  if (!this.started) throw new Error('should call start at first')
+  return this.transit({x: x, y: y})
+}
+
+/**
+ * Move by angle and distance
+ *
+ * @param {Number} angle
+ * @param {Number} distance
+ * @return {Promise}
+ * @api public
+ */
+TouchSimulate.prototype.move = function (angle, distance) {
+  if (!this.started) this.start()
+  if (distance === 0) throw new Error('distance should not be 0')
+  var dx  = distance*Math.cos(angle)
+  var dy  = distance*Math.sin(angle)
+  var y = this.clientY + dy
+  var x = this.clientX + dx
+  return this.transit({x: x, y: y})
+}
+
+/**
+ * Tap element at postion
+ *
+ * @param {String} pos optional
+ * @return {Promise}
+ * @api public
+ */
+TouchSimulate.prototype.tap = function (pos) {
+  var self = this
+  this.start(pos)
+  return this.wait(50).then(function () {
+    var e = self.fireEvent('touchend', self.clientX, self.clientY)
+    self.started = false
+    self.emit('end')
+    return e
+  })
+}
+
+/**
+ * Wait for milisecond
+ *
+ * @param  {String|Number}  n
+ * @return {Promise}
+ * @api public
+ */
+TouchSimulate.prototype.wait = function (n) {
+  return new Promise(function (resolve) {
+    setTimeout(function () {
+      resolve()
+    }, n)
+  })
+}
+
+/**
+ * Transfrom between start and end
+ *
+ * @param {Object} start
+ * @param {Object} end
+ * @api public
+ */
+TouchSimulate.prototype.transit = function (end) {
+  var self = this
+  this.moving = true
+  var start = {x: this.clientX, y: this.clientY}
+  var duration = this.getDuration(start, end)
+  var tween = Tween(start)
+    .ease(this._ease)
+    .to(end)
+    .duration(duration)
+
+  tween.update(function(o){
+    self.fireEvent('touchmove', o.x, o.y)
+    self.clientX = o.x
+    self.clientY = o.y
+    self.emit('move', o.x, o.y)
+  })
+
+  var promise = new Promise(function (resolve) {
+    tween.on('end', function(){
+      self.moving = false
+      self.started = false
+      var e = self.fireEvent('touchend', self.clientX, self.clientY)
+      self.emit('end')
+      animate = function(){} // eslint-disable-line
+      resolve(e)
+    })
+  })
+
+  function animate() {
+    raf(animate)
+    tween.update()
+  }
+
+  animate()
+  return promise
+}
+
+/**
+ * Get duration in milisecond
+ *
+ * @param {Object} start
+ * @param {Object} end
+ * @return {Number}
+ * @api public
+ */
+TouchSimulate.prototype.getDuration = function (start, end) {
+  var dx = Math.abs(start.x - end.x)
+  var dy = Math.abs(start.y - end.y)
+  var distance = Math.sqrt(dx*dx + dy*dy)
+  return 1000*distance/this._speed
+}
+
+/**
+ * Fire event with type, clientX and clientY
+ *
+ * @param {String} type
+ * @param {Number} x
+ * @param {Number} y
+ * @return {Event}
+ * @api public
+ */
+TouchSimulate.prototype.fireEvent = function (type, x, y) {
+  var e = createEvent(this.el, type, x, y)
+  this.el.dispatchEvent(e)
+  return e
+}
+
+TouchSimulate.prototype.createPoint = function () {
+  var div = document.createElement('div')
+  var s = div.style
+  s.position = 'absolute'
+  s.top = '0'
+  s.left = '0'
+  s.width = '10px'
+  s.height = '10px'
+  s.borderRadius = '50%'
+  s.zIndex = '9999'
+  s.backgroundColor = 'rgba(0,0,0,0.3)'
+  document.body.appendChild(div)
+  var r = div.getBoundingClientRect()
+  div.dataset.x = r.left + r.width/2
+  div.dataset.y = r.top + r.height/2
+  this.point = div
+}
+
+TouchSimulate.prototype.hidePoint = function () {
+  var s = this.point.style
+  s.backgroundColor = 'rgba(0,0,0,0)'
+}
+
+TouchSimulate.prototype.showPoint = function () {
+  var s = this.point.style
+  s.backgroundColor = 'rgba(0,0,0,0.3)'
+}
+
+TouchSimulate.prototype.movePoint = function (x, y) {
+  var p = this.point
+  var s = p.style
+  x = x - Number(p.dataset.x)
+  y = y - Number(p.dataset.y)
+  if (has3d) {
+    s[transform] = 'translate3d(' + x + 'px,' + y + 'px, 0)'
+  } else {
+    s[transform] = 'translateX(' + x + 'px),translateY(' + y + 'px)'
+  }
+}
+/**
+ * Get coordinate by element and position string
+ *
+ * @param  {Element}  el
+ * @param {String} position
+ * @return {Object}
+ * @api public
+ */
+function getCoordinate(el, position) {
+  var rect = el.getBoundingClientRect()
+  var x = rect.left
+  var y = rect.top
+  switch (position) {
+    case 't':
+      x = x + rect.width/2
+      break;
+    case 'b':
+      x = x + rect.width/2
+      y = y + rect.height
+      break;
+    case 'l':
+      y = y + rect.height/2
+      break;
+    case 'r':
+      x = x + rect.widht
+      y = y + rect.height/2
+      break;
+    default:
+      x = x + rect.width/2
+      y = y + rect.height/2
+  }
+  return {x: x, y: y}
+}
+
+module.exports = TouchSimulate
