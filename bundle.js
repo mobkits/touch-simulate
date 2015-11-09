@@ -49,36 +49,47 @@
 	var transform = detect.transform
 	var TouchSimulate = __webpack_require__(7)
 	var el = document.getElementById('demo')
-	moveable(el)
+	var m = moveable(el)
 	
 	var touch = new TouchSimulate(el, {
 	  speed: 80,
 	  point: true
 	})
 	
-	touch.start()
-	touch.moveRight(150)
-	.then(function () {
-	  return touch.wait(1000)
-	})
-	.then(function () {
-	  return touch.moveDown(150)
-	})
-	.then(function () {
-	  return touch.wait(1000)
-	})
-	.then(function () {
-	  return touch.moveLeft(150)
-	})
-	.then(function () {
-	  return touch.wait(1000)
-	})
-	.then(function () {
-	  return touch.moveUp(150)
-	})
-	.then(function () {
-	  return touch.move(Math.PI/4, 150)
-	})
+	function run() {
+	  touch.start()
+	  touch.moveRight(150)
+	  .then(function () {
+	    return touch.wait(1000)
+	  })
+	  .then(function () {
+	    return touch.moveDown(150)
+	  })
+	  .then(function () {
+	    return touch.wait(1000)
+	  })
+	  .then(function () {
+	    return touch.moveLeft(150)
+	  })
+	  .then(function () {
+	    return touch.wait(1000)
+	  })
+	  .then(function () {
+	    return touch.moveUp(150)
+	  })
+	  .then(function () {
+	    return touch.move(Math.PI/4, 150)
+	  })
+	  .then(function () {
+	    m.reset()
+	    return touch.wait(1000)
+	  })
+	  .then(function () {
+	    run()
+	  })
+	}
+	
+	run()
 	
 	function moveable(node) {
 	  var last
@@ -87,15 +98,15 @@
 	  node.addEventListener('touchstart', function (e) {
 	    var t = e.touches[0]
 	    last = {
-	      x: t.clientX,
-	      y: t.clientY
+	      x: t.pageX,
+	      y: t.pageY
 	    }
 	  }, false)
 	
 	  node.addEventListener('touchmove', function (e) {
 	    var t = e.touches[0]
-	    x = x + t.clientX - last.x
-	    y = y + t.clientY - last.y
+	    x = x + t.pageX - last.x
+	    y = y + t.pageY - last.y
 	    var s = node.style
 	    if (has3d) {
 	      s[transform] = 'translate3d(' + x + 'px,' + y + 'px, 0)'
@@ -103,14 +114,21 @@
 	      s[transform] = 'translateX(' + x + 'px),translateY(' + y + 'px)'
 	    }
 	    last = {
-	      x: t.clientX,
-	      y: t.clientY
+	      x: t.pageX,
+	      y: t.pageY
 	    }
 	  }, false)
 	
 	  node.addEventListener('touchend', function (e) {
-	    var t =  e.touches[0]
 	  })
+	
+	  return {
+	    reset: function () {
+	      x = 0,
+	      y = 0,
+	      node.style[transform] = ''
+	    }
+	  }
 	}
 
 
@@ -284,25 +302,48 @@
 	  }
 	})()
 	
+	function assign(to, from) {
+	  Object.keys(from).forEach(function (k) {
+	    to[k] = from[k]
+	  })
+	  return to
+	}
+	
 	function createEvent(target, type, x, y) {
 	  var e = new UIEvent(type, {
 	      bubbles: true,
 	      cancelable: false,
 	      detail: 1
 	  })
-	  e.touches = [{
+	  var touch = customEvent('touch')
+	  assign(touch, {
 	    identifier: uid(),
 	    screenX: x,
 	    screenY: y,
 	    clientX: x,
 	    clientY: y,
 	    pageX: x + document.body.scrollLeft,
-	    pageY: y + document.body.scrolltop,
+	    pageY: y + document.body.scrollTop,
 	    target: target
-	  }]
+	  })
+	  e.touches = [touch]
 	  return e
 	}
 	
+	function customEvent(name) {
+	  var e
+	  try {
+	    e = new CustomEvent(name)
+	  } catch(error) {
+	    try {
+	      e = document.createEvent('CustomEvent')
+	      e.initCustomEvent(name, false, false, 0)
+	    } catch(err) {
+	      return
+	    }
+	  }
+	  return e
+	}
 	/**
 	 * Construct TouchSimulate with dispatch element and options
 	 *
@@ -574,8 +615,8 @@
 	TouchSimulate.prototype.movePoint = function (x, y) {
 	  var p = this.point
 	  var s = p.style
-	  x = x - Number(p.dataset.x)
-	  y = y - Number(p.dataset.y)
+	  x = x - Number(p.dataset.x) + document.body.scrollLeft
+	  y = y - Number(p.dataset.y) + document.body.scrollTop
 	  if (has3d) {
 	    s[transform] = 'translate3d(' + x + 'px,' + y + 'px, 0)'
 	  } else {
