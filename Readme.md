@@ -2,6 +2,8 @@
 
   Simulate touch event(A fake one with pageX, pageY, clientX, clientY available) even at desktop browser for testing.
 
+  TODO: test
+
 ## Features
 
 * Automatic emit touchmove when moving
