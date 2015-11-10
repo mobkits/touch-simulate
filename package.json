@@ -1,6 +1,6 @@
 {
   "name": "touch-simulate",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "simulate touch event without browser support touch",
   "main": "index.js",
   "directories": {
