@@ -180,6 +180,20 @@ describe('.move()', function () {
     touch.speed(80)
     touch.move(Math.PI/4, 10)
   })
+
+  it('should not fire end event when set up param false', function () {
+    var fired
+    el.addEventListener('touchend', function () {
+      fired = true
+    })
+    var touch = Touch(el)
+    touch.speed(80)
+    return touch.move(Math.PI/4, 10, false).then(function () {
+      return touch.wait(20)
+    }).then(function () {
+      assert.notEqual(fired, true)
+    })
+  })
 })
 
 describe('.wait(ms)', function () {

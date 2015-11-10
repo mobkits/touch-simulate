@@ -137,9 +137,9 @@ TouchSimulate.prototype.start = function (pos) {
  * @return {Promise}
  * @api public
  */
-TouchSimulate.prototype.moveUp = function (distance) {
+TouchSimulate.prototype.moveUp = function (distance, up) {
   var a = Math.PI*1.5
-  return this.move(a, distance)
+  return this.move(a, distance, up)
 }
 
 /**
@@ -149,9 +149,9 @@ TouchSimulate.prototype.moveUp = function (distance) {
  * @return {Promise}
  * @api public
  */
-TouchSimulate.prototype.moveDown = function (distance) {
+TouchSimulate.prototype.moveDown = function (distance, up) {
   var a = Math.PI/2
-  return this.move(a, distance)
+  return this.move(a, distance, up)
 }
 
 /**
@@ -161,9 +161,9 @@ TouchSimulate.prototype.moveDown = function (distance) {
  * @return {Promise}
  * @api public
  */
-TouchSimulate.prototype.moveLeft = function (distance) {
+TouchSimulate.prototype.moveLeft = function (distance, up) {
   var a = Math.PI
-  return this.move(a, distance)
+  return this.move(a, distance, up)
 }
 
 /**
@@ -173,9 +173,9 @@ TouchSimulate.prototype.moveLeft = function (distance) {
  * @return {Promise}
  * @api public
  */
-TouchSimulate.prototype.moveRight = function (distance) {
+TouchSimulate.prototype.moveRight = function (distance, up) {
   var a = 0
-  return this.move(a, distance)
+  return this.move(a, distance, up)
 }
 
 /**
@@ -186,9 +186,11 @@ TouchSimulate.prototype.moveRight = function (distance) {
  * @return {Promise}
  * @api public
  */
-TouchSimulate.prototype.moveTo = function (x, y) {
-  if (!this.started) throw new Error('should call start at first')
-  return this.transit({x: x, y: y})
+TouchSimulate.prototype.moveTo = function (x, y, up) {
+  if (!this.started) {
+    this.start()
+  }
+  return this.transit({x: x, y: y}, up)
 }
 
 /**
@@ -199,14 +201,14 @@ TouchSimulate.prototype.moveTo = function (x, y) {
  * @return {Promise}
  * @api public
  */
-TouchSimulate.prototype.move = function (angle, distance) {
+TouchSimulate.prototype.move = function (angle, distance, up) {
   if (!this.started) this.start()
   if (distance === 0) throw new Error('distance should not be 0')
   var dx  = distance*Math.cos(angle)
   var dy  = distance*Math.sin(angle)
   var y = this.clientY + dy
   var x = this.clientX + dx
-  return this.transit({x: x, y: y})
+  return this.transit({x: x, y: y}, up)
 }
 
 /**
@@ -251,7 +253,7 @@ TouchSimulate.prototype.wait = function (n) {
  * @param {Object} end
  * @api public
  */
-TouchSimulate.prototype.transit = function (end) {
+TouchSimulate.prototype.transit = function (end, up) {
   var self = this
   this.moving = true
   var start = {x: this.clientX, y: this.clientY}
@@ -272,8 +274,10 @@ TouchSimulate.prototype.transit = function (end) {
     tween.on('end', function(){
       self.moving = false
       self.started = false
-      var e = self.fireEvent('touchend', self.clientX, self.clientY)
-      self.emit('end')
+      if (up !== false) {
+        var e = self.fireEvent('touchend', self.clientX, self.clientY)
+        self.emit('end')
+      }
       animate = function(){} // eslint-disable-line
       resolve(e)
     })

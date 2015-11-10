@@ -75,19 +75,20 @@ position could be `t` `l` `r` `b` for alias for top, left, right and bottom
 position could also be an array, which contains [x, y] for clientX and clientY
 This function would throw error if the movemonent not finished
 
-#### .moveUp(distance)
-#### .moveDown(distance)
-#### .moveLeft(distance)
-#### .moveRight(distance)
+#### .moveUp(distance, [up])
+#### .moveDown(distance, [up])
+#### .moveLeft(distance, [up])
+#### .moveRight(distance, [up])
 
 Move to one direction, return promise which resolved with event of `touchend`
+If `up` is set to false, no touchend event is fired.
 
-#### .moveTo(x, y)
+#### .moveTo(x, y, [up])
 
 Insread of move direction, set move monent destination,
 x and y are clientX and clientY (relative to viewport, regardless of scrollbar)
 
-#### .move(angel, distance)
+#### .move(angel, distance, [up])
 
 Use `angel` which should be (0 ~ 2*PI) instead of `up` `down` `left` nad `right`
 
