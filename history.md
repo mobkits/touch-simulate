@@ -1,3 +1,6 @@
+# 0.0.8
+* add up param to control touchend event
+
 # 0.0.7
 * add duration for tap
 
