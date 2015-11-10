@@ -86,17 +86,35 @@ function TouchSimulate(el, opts) {
 
 Emitter(TouchSimulate.prototype)
 
+/**
+ * Set speed to n
+ *
+ * @param  {Number}  n
+ * @api public
+ */
 TouchSimulate.prototype.speed = function (n) {
   this._speed = n
   return this
 }
 
+/**
+ * Set ease function
+ *
+ * @param {String} ease
+ * @api public
+ */
 TouchSimulate.prototype.ease = function (ease) {
   this._ease = ease
   return this
 }
 
 
+/**
+ * Start moving at position
+ *
+ * @param {String} pos
+ * @api public
+ */
 TouchSimulate.prototype.start = function (pos) {
   if (this.moving) throw new Error('It\'s moving, can not start')
   this.started = true
