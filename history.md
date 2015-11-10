@@ -1,3 +1,6 @@
+# 0.0.7
+* add duration for tap
+
 # 0.0.6
 * Simulate `e.changedTouches` and `e.targetTouches`
 

@@ -91,7 +91,7 @@ x and y are clientX and clientY (relative to viewport, regardless of scrollbar)
 
 Use `angel` which should be (0 ~ 2*PI) instead of `up` `down` `left` nad `right`
 
-#### .tap([position])
+#### .tap([position], [duration])
 
 Helper to emit tap event, return promise, resolved with event of `touchend`
 

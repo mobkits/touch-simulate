@@ -213,13 +213,15 @@ TouchSimulate.prototype.move = function (angle, distance) {
  * Tap element at postion
  *
  * @param {String} pos optional
+ * @param {duration} duration of milisecond optional
  * @return {Promise}
  * @api public
  */
-TouchSimulate.prototype.tap = function (pos) {
+TouchSimulate.prototype.tap = function (pos, duration) {
   var self = this
+  duration = duration || 50
   this.start(pos)
-  return this.wait(50).then(function () {
+  return this.wait(duration).then(function () {
     var e = self.fireEvent('touchend', self.clientX, self.clientY)
     self.started = false
     self.emit('end')
