@@ -44,6 +44,18 @@ describe('.start()', function () {
     assert.equal(fired, true)
   })
 
+  it('should have changedTouches and targetTouches', function () {
+    var fired
+    el.addEventListener('touchstart', function (e) {
+      fired = true
+      assert.equal(e.changedTouches.length, 1)
+      assert.equal(e.targetTouches.length, 1)
+    })
+    var touch = Touch(el)
+    touch.start()
+    assert.equal(fired, true)
+  })
+
   it('should start with position', function () {
     var fired
     var pos

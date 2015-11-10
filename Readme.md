@@ -4,6 +4,8 @@
 
   Simulate touch event(A fake one with pageX, pageY, clientX, clientY available) even at desktop browser for testing.
 
+  You can have touches by `e.touches[0]` `e.changedTouches[0]` or `e.targetTouches[0]`, they are the same.
+
 ## Features
 
 * Automatic emit touchmove when moving

@@ -35,6 +35,8 @@ function createEvent(type, x, y) {
     pageX: x + document.body.scrollLeft,
     pageY: y + document.body.scrollTop
   })
+  e.changedTouches = [touch]
+  e.targetTouches = [touch]
   e.touches = [touch]
   return e
 }
