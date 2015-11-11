@@ -1,3 +1,6 @@
+# 0.1.1
+* fix position array for start
+
 # 0.1.0
 * Use enhanced promise for chainable
 * Touchstart fired on the previous position when move method calls again

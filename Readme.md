@@ -41,7 +41,7 @@ touch.start() // fire touchstart at center of element
 ```
 
 You can chain the methods, the function call would wait for previous one to be fullfilled, the chainable method list:
-j
+
 `start` `moveUp` `moveDown` `moveLeft` `moveRight` `moveTo` `move` `wait`
 
 ## API
