@@ -6,7 +6,7 @@
 
   You can have touches by `e.touches[0]` `e.changedTouches[0]` or `e.targetTouches[0]`, they are the same.
 
-  No support for multiply touch yet.
+  Already used for testing my components like [iscroll](https://github.com/chemzqm/iscroll), [pull-to-refresh](https://github.com/chemzqm/pull-to-refresh) and [sweet-sortable](https://github.com/chemzqm/sweet-sortable)
 
 ## Features
 
