@@ -1,5 +1,5 @@
 test:
-	@@webpack-dev-server 'mocha!./test/test.js' --hot --inline
+	@webpack-dev-server 'mocha!./test/test.js' --hot --inline --devtool eval
 
 doc:
 	@ghp-import example -n -p

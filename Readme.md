@@ -6,12 +6,14 @@
 
   You can have touches by `e.touches[0]` `e.changedTouches[0]` or `e.targetTouches[0]`, they are the same.
 
+  No support for multiply touch yet.
+
 ## Features
 
 * Automatic emit touchmove when moving
 * Corrent `e.clientX`, `e.clientY` and many others
+* Promise based, chainaible methods
 * Confige movemoment by speed and ease function
-* Promise based
 
 ## Install
 
@@ -28,27 +30,19 @@ var touch = new TouchSimulate(el, {
   point: true
 })
 
-touch.start()
-touch.moveRight(150)
-.then(function () {
-  return touch.wait(1000)
-})
-.then(function () {
-  return touch.moveDown(150)
-})
-.then(function () {
-  return touch.wait(1000)
-})
-.then(function () {
-  return touch.moveLeft(150)
-})
-.then(function () {
-  return touch.wait(1000)
-})
-.then(function () {
-  return touch.moveUp(150)
-})
+touch.start() // fire touchstart at center of element
+.moveRight(150, false) // move right 150px, no touchend event
+.wait(100) // wait 100ms
+.moveDown(150, false)
+.wait(100)
+.moveLeft(150, false)
+.wait(100)
+.moveUp(150) // move up 150px and fire touchend
 ```
+
+You can chain the methods, the function call would wait for previous one to be fullfilled, the chainable method list:
+j
+`start` `moveUp` `moveDown` `moveLeft` `moveRight` `moveTo` `move` `wait`
 
 ## API
 
@@ -75,20 +69,21 @@ position could be `t` `l` `r` `b` for alias for top, left, right and bottom
 position could also be an array, which contains [x, y] for clientX and clientY
 This function would throw error if the movemonent not finished
 
-#### .moveUp(distance, [up])
-#### .moveDown(distance, [up])
-#### .moveLeft(distance, [up])
-#### .moveRight(distance, [up])
+#### .moveUp(distance, [end])
+#### .moveDown(distance, [end])
+#### .moveLeft(distance, [end])
+#### .moveRight(distance, [end])
 
+If not started, start at the center of element, or the current position
 Move to one direction, return promise which resolved with event of `touchend`
-If `up` is set to false, no touchend event is fired.
+If `end` is set to false, no touchend event is fired.
 
-#### .moveTo(x, y, [up])
+#### .moveTo(x, y, [end])
 
 Insread of move direction, set move monent destination,
 x and y are clientX and clientY (relative to viewport, regardless of scrollbar)
 
-#### .move(angel, distance, [up])
+#### .move(angel, distance, [end])
 
 Use `angel` which should be (0 ~ 2*PI) instead of `up` `down` `left` nad `right`
 

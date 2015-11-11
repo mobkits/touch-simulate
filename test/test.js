@@ -29,6 +29,25 @@ describe('Touch Simulate', function() {
   })
 })
 
+describe('chainable', function() {
+  it('should chain the method', function () {
+    var touch = Touch(el, {speed: 100})
+    var start = Date.now()
+    return touch.start() // touchstart
+          .moveRight(10, false) //move right not fire touchend
+          .wait(100) // wait 100ms
+          .moveDown(10, false)
+          .wait(100)
+          .moveLeft(10, false)
+          .wait(100)
+          .moveUp(10)
+          .then(function () {
+            var d = Date.now() - start
+            assert(d > 700)
+          })
+  })
+})
+
 describe('.start()', function () {
   it('should start with out position', function () {
     var fired
@@ -189,7 +208,7 @@ describe('.move()', function () {
     var touch = Touch(el)
     touch.speed(80)
     return touch.move(Math.PI/4, 10, false).then(function () {
-      return touch.wait(20)
+      return touch.wait(200)
     }).then(function () {
       assert.notEqual(fired, true)
     })
@@ -215,8 +234,7 @@ describe('.tap(pos)', function () {
       fired = true
     }))
     var touch = Touch(el)
-    var p = touch.tap()
-    return p.then(function (e) {
+    return touch.tap().then(function (e) {
       assert.equal(e.target, el)
       assert.equal(fired, true)
     }, function () {

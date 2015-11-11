@@ -120,7 +120,12 @@ TouchSimulate.prototype.ease = function (ease) {
 TouchSimulate.prototype.start = function (pos) {
   if (this.moving) throw new Error('It\'s moving, can not start')
   this.started = true
-  var cor = getCoordinate(this.el, pos)
+  var cor
+  if (pos === true && this.clientX != null && this.clientY != null) {
+    cor = {x: this.clientX, y: this.clientY}
+  } else {
+    cor = getCoordinate(this.el, pos)
+  }
   var x = cor.x
   var y = cor.y
   this.clientX = x
@@ -137,9 +142,9 @@ TouchSimulate.prototype.start = function (pos) {
  * @return {Promise}
  * @api public
  */
-TouchSimulate.prototype.moveUp = function (distance, up) {
+TouchSimulate.prototype.moveUp = function (distance, end) {
   var a = Math.PI*1.5
-  return this.move(a, distance, up)
+  return this.move(a, distance, end)
 }
 
 /**
@@ -149,9 +154,9 @@ TouchSimulate.prototype.moveUp = function (distance, up) {
  * @return {Promise}
  * @api public
  */
-TouchSimulate.prototype.moveDown = function (distance, up) {
+TouchSimulate.prototype.moveDown = function (distance, end) {
   var a = Math.PI/2
-  return this.move(a, distance, up)
+  return this.move(a, distance, end)
 }
 
 /**
@@ -161,9 +166,9 @@ TouchSimulate.prototype.moveDown = function (distance, up) {
  * @return {Promise}
  * @api public
  */
-TouchSimulate.prototype.moveLeft = function (distance, up) {
+TouchSimulate.prototype.moveLeft = function (distance, end) {
   var a = Math.PI
-  return this.move(a, distance, up)
+  return this.move(a, distance, end)
 }
 
 /**
@@ -173,9 +178,9 @@ TouchSimulate.prototype.moveLeft = function (distance, up) {
  * @return {Promise}
  * @api public
  */
-TouchSimulate.prototype.moveRight = function (distance, up) {
+TouchSimulate.prototype.moveRight = function (distance, end) {
   var a = 0
-  return this.move(a, distance, up)
+  return this.move(a, distance, end)
 }
 
 /**
@@ -186,11 +191,9 @@ TouchSimulate.prototype.moveRight = function (distance, up) {
  * @return {Promise}
  * @api public
  */
-TouchSimulate.prototype.moveTo = function (x, y, up) {
-  if (!this.started) {
-    this.start()
-  }
-  return this.transit({x: x, y: y}, up)
+TouchSimulate.prototype.moveTo = function (x, y, end) {
+  if (!this.started) this.start(true)
+  return this.transit({x: x, y: y}, end)
 }
 
 /**
@@ -201,14 +204,14 @@ TouchSimulate.prototype.moveTo = function (x, y, up) {
  * @return {Promise}
  * @api public
  */
-TouchSimulate.prototype.move = function (angle, distance, up) {
-  if (!this.started) this.start()
+TouchSimulate.prototype.move = function (angle, distance, end) {
+  if (!this.started) this.start(true)
   if (distance === 0) throw new Error('distance should not be 0')
   var dx  = distance*Math.cos(angle)
   var dy  = distance*Math.sin(angle)
   var y = this.clientY + dy
   var x = this.clientX + dx
-  return this.transit({x: x, y: y}, up)
+  return this.transit({x: x, y: y}, end)
 }
 
 /**
@@ -239,11 +242,12 @@ TouchSimulate.prototype.tap = function (pos, duration) {
  * @api public
  */
 TouchSimulate.prototype.wait = function (n) {
-  return new Promise(function (resolve) {
+  var promise = this.createPromise(function (resolve) {
     setTimeout(function () {
       resolve()
     }, n)
   })
+  return promise
 }
 
 /**
@@ -270,7 +274,7 @@ TouchSimulate.prototype.transit = function (end, up) {
     self.emit('move', o.x, o.y)
   })
 
-  var promise = new Promise(function (resolve) {
+  var promise = this.createPromise(function (resolve) {
     tween.on('end', function(){
       self.moving = false
       self.started = false
@@ -366,6 +370,35 @@ TouchSimulate.prototype.movePoint = function (x, y) {
   } else {
     s[transform] = 'translateX(' + x + 'px),translateY(' + y + 'px)'
   }
+}
+
+/**
+ * Create a decorater for TouchSimulate
+ *
+ * @param  {Function}  fn
+ * @return {Promise}
+ * @api private
+ */
+TouchSimulate.prototype.createPromise = function (fn) {
+  var promise = new Promise(fn)
+  var names = ['start', 'moveUp', 'moveDown', 'moveLeft', 'moveRight', 'moveTo', 'move', 'wait']
+  var self = this
+  names.forEach(function (name) {
+    promise[name] = function () {
+      var args = arguments
+      return self.createPromise(function (resolve, reject) {
+        promise.then(function () {
+          try {
+            var p = self[name].apply(self, args)
+          } catch (err) {
+            return reject(err)
+          }
+          resolve(p)
+        })
+      })
+    }
+  })
+  return promise
 }
 /**
  * Get coordinate by element and position string
