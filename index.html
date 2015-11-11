@@ -26,11 +26,18 @@
       #code > pre {
         background:#fdf6e3
       }
+      #demo > div {
+        height: 150px;
+        line-height: 150px;
+        text-align: center;
+      }
     </style>
   </head>
   <body>
-    <div id="demo"></div>
-<div id="code">
+    <div id="demo">
+      <div>test</div>
+    </div>
+    <div id="code">
 <pre><code style="display:block;padding:0.5em;background:#fdf6e3;color:#657b83;"><span class="keyword" style="color:#859900;">var</span> detect = require(<span class="string" style="color:#2aa198;">'prop-detect'</span>)
 <span class="keyword" style="color:#859900;">var</span> has3d = detect.has3d
 <span class="keyword" style="color:#859900;">var</span> transform = detect.transform
@@ -39,34 +46,20 @@
 <span class="keyword" style="color:#859900;">var</span> m = moveable(el)
 
 <span class="keyword" style="color:#859900;">var</span> touch = <span class="keyword" style="color:#859900;">new</span> TouchSimulate(el, {
-  speed: <span class="number" style="color:#2aa198;">80</span>,
-  point: <span class="literal">true</span>
+  speed: <span class="number" style="color:#2aa198;">80</span>
 })
 
 <span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="title" style="color:#268bd2;">run</span><span class="params">()</span> {</span>
   touch.start()
-  touch.moveRight(<span class="number" style="color:#2aa198;">150</span>)
-  .then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
-    <span class="keyword" style="color:#859900;">return</span> touch.wait(<span class="number" style="color:#2aa198;">1000</span>)
-  })
-  .then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
-    <span class="keyword" style="color:#859900;">return</span> touch.moveDown(<span class="number" style="color:#2aa198;">150</span>)
-  })
-  .then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
-    <span class="keyword" style="color:#859900;">return</span> touch.wait(<span class="number" style="color:#2aa198;">1000</span>)
-  })
-  .then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
-    <span class="keyword" style="color:#859900;">return</span> touch.moveLeft(<span class="number" style="color:#2aa198;">150</span>)
-  })
-  .then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
-    <span class="keyword" style="color:#859900;">return</span> touch.wait(<span class="number" style="color:#2aa198;">1000</span>)
-  })
-  .then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
-    <span class="keyword" style="color:#859900;">return</span> touch.moveUp(<span class="number" style="color:#2aa198;">150</span>)
-  })
-  .then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
-    <span class="keyword" style="color:#859900;">return</span> touch.move(Math.PI/<span class="number" style="color:#2aa198;">4</span>, <span class="number" style="color:#2aa198;">150</span>)
-  })
+  .moveRight(<span class="number" style="color:#2aa198;">150</span>, <span class="literal">false</span>)
+  .wait(<span class="number" style="color:#2aa198;">1000</span>)
+  .moveDown(<span class="number" style="color:#2aa198;">150</span>, <span class="literal">false</span>)
+  .wait(<span class="number" style="color:#2aa198;">1000</span>)
+  .moveLeft(<span class="number" style="color:#2aa198;">150</span>, <span class="literal">false</span>)
+  .wait(<span class="number" style="color:#2aa198;">1000</span>)
+  .moveUp(<span class="number" style="color:#2aa198;">150</span>, <span class="literal">false</span>)
+  .move(Math.PI/<span class="number" style="color:#2aa198;">4</span>, <span class="number" style="color:#2aa198;">150</span>)
+  .wait(<span class="number" style="color:#2aa198;">1000</span>)
   .then(<span class="function"><span class="keyword" style="color:#859900;">function</span> <span class="params">()</span> {</span>
     m.reset()
     <span class="keyword" style="color:#859900;">return</span> touch.wait(<span class="number" style="color:#2aa198;">1000</span>)

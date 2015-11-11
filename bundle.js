@@ -52,34 +52,20 @@
 	var m = moveable(el)
 	
 	var touch = new TouchSimulate(el, {
-	  speed: 80,
-	  point: true
+	  speed: 80
 	})
 	
 	function run() {
 	  touch.start()
-	  touch.moveRight(150)
-	  .then(function () {
-	    return touch.wait(1000)
-	  })
-	  .then(function () {
-	    return touch.moveDown(150)
-	  })
-	  .then(function () {
-	    return touch.wait(1000)
-	  })
-	  .then(function () {
-	    return touch.moveLeft(150)
-	  })
-	  .then(function () {
-	    return touch.wait(1000)
-	  })
-	  .then(function () {
-	    return touch.moveUp(150)
-	  })
-	  .then(function () {
-	    return touch.move(Math.PI/4, 150)
-	  })
+	  .moveRight(150, false)
+	  .wait(1000)
+	  .moveDown(150, false)
+	  .wait(1000)
+	  .moveLeft(150, false)
+	  .wait(1000)
+	  .moveUp(150, false)
+	  .move(Math.PI/4, 150)
+	  .wait(1000)
 	  .then(function () {
 	    m.reset()
 	    return touch.wait(1000)
@@ -124,9 +110,10 @@
 	
 	  return {
 	    reset: function () {
+	      var top = window.scrollY
 	      x = 0,
-	      y = 0,
-	      node.style[transform] = ''
+	      y = top,
+	      node.style[transform] = 'translate3d(' + x + 'px,' + y + 'px, 0)'
 	    }
 	  }
 	}
@@ -309,7 +296,7 @@
 	  return to
 	}
 	
-	function createEvent(target, type, x, y) {
+	function createEvent(type, x, y) {
 	  var e = new UIEvent(type, {
 	      bubbles: true,
 	      cancelable: false,
@@ -323,9 +310,10 @@
 	    clientX: x,
 	    clientY: y,
 	    pageX: x + document.body.scrollLeft,
-	    pageY: y + document.body.scrollTop,
-	    target: target
+	    pageY: y + document.body.scrollTop
 	  })
+	  e.changedTouches = [touch]
+	  e.targetTouches = [touch]
 	  e.touches = [touch]
 	  return e
 	}
@@ -352,11 +340,14 @@
 	 * @api public
 	 */
 	function TouchSimulate(el, opts) {
+	  if (!(this instanceof TouchSimulate)) return new TouchSimulate(el, opts)
 	  this.el = el
-	  this.opts = opts || {}
+	  opts = opts || {}
+	  this.opts = opts
 	  this._speed = opts.speed || 40
 	  this._ease = opts.ease || 'linear'
-	  if (opts.point)  {
+	  this.fixTarget = opts.fixTarget
+	  if (opts.point && !this.fixTarget)  {
 	    this.createPoint()
 	    var self = this
 	    this.on('start', function (x, y) {
@@ -374,21 +365,44 @@
 	
 	Emitter(TouchSimulate.prototype)
 	
+	/**
+	 * Set speed to n
+	 *
+	 * @param  {Number}  n
+	 * @api public
+	 */
 	TouchSimulate.prototype.speed = function (n) {
 	  this._speed = n
 	  return this
 	}
 	
+	/**
+	 * Set ease function
+	 *
+	 * @param {String} ease
+	 * @api public
+	 */
 	TouchSimulate.prototype.ease = function (ease) {
 	  this._ease = ease
 	  return this
 	}
 	
 	
+	/**
+	 * Start moving at position
+	 *
+	 * @param {String} pos
+	 * @api public
+	 */
 	TouchSimulate.prototype.start = function (pos) {
 	  if (this.moving) throw new Error('It\'s moving, can not start')
 	  this.started = true
-	  var cor = getCoordinate(this.el, pos)
+	  var cor
+	  if (pos === true && this.clientX != null && this.clientY != null) {
+	    cor = {x: this.clientX, y: this.clientY}
+	  } else {
+	    cor = getCoordinate(this.el, pos)
+	  }
 	  var x = cor.x
 	  var y = cor.y
 	  this.clientX = x
@@ -405,9 +419,9 @@
 	 * @return {Promise}
 	 * @api public
 	 */
-	TouchSimulate.prototype.moveUp = function (distance) {
+	TouchSimulate.prototype.moveUp = function (distance, end) {
 	  var a = Math.PI*1.5
-	  return this.move(a, distance)
+	  return this.move(a, distance, end)
 	}
 	
 	/**
@@ -417,9 +431,9 @@
 	 * @return {Promise}
 	 * @api public
 	 */
-	TouchSimulate.prototype.moveDown = function (distance) {
+	TouchSimulate.prototype.moveDown = function (distance, end) {
 	  var a = Math.PI/2
-	  return this.move(a, distance)
+	  return this.move(a, distance, end)
 	}
 	
 	/**
@@ -429,9 +443,9 @@
 	 * @return {Promise}
 	 * @api public
 	 */
-	TouchSimulate.prototype.moveLeft = function (distance) {
+	TouchSimulate.prototype.moveLeft = function (distance, end) {
 	  var a = Math.PI
-	  return this.move(a, distance)
+	  return this.move(a, distance, end)
 	}
 	
 	/**
@@ -441,9 +455,9 @@
 	 * @return {Promise}
 	 * @api public
 	 */
-	TouchSimulate.prototype.moveRight = function (distance) {
+	TouchSimulate.prototype.moveRight = function (distance, end) {
 	  var a = 0
-	  return this.move(a, distance)
+	  return this.move(a, distance, end)
 	}
 	
 	/**
@@ -454,9 +468,9 @@
 	 * @return {Promise}
 	 * @api public
 	 */
-	TouchSimulate.prototype.moveTo = function (x, y) {
-	  if (!this.started) throw new Error('should call start at first')
-	  return this.transit({x: x, y: y})
+	TouchSimulate.prototype.moveTo = function (x, y, end) {
+	  if (!this.started) this.start(true)
+	  return this.transit({x: x, y: y}, end)
 	}
 	
 	/**
@@ -467,27 +481,29 @@
 	 * @return {Promise}
 	 * @api public
 	 */
-	TouchSimulate.prototype.move = function (angle, distance) {
-	  if (!this.started) this.start()
+	TouchSimulate.prototype.move = function (angle, distance, end) {
+	  if (!this.started) this.start(true)
 	  if (distance === 0) throw new Error('distance should not be 0')
 	  var dx  = distance*Math.cos(angle)
 	  var dy  = distance*Math.sin(angle)
 	  var y = this.clientY + dy
 	  var x = this.clientX + dx
-	  return this.transit({x: x, y: y})
+	  return this.transit({x: x, y: y}, end)
 	}
 	
 	/**
 	 * Tap element at postion
 	 *
 	 * @param {String} pos optional
+	 * @param {duration} duration of milisecond optional
 	 * @return {Promise}
 	 * @api public
 	 */
-	TouchSimulate.prototype.tap = function (pos) {
+	TouchSimulate.prototype.tap = function (pos, duration) {
 	  var self = this
+	  duration = duration || 50
 	  this.start(pos)
-	  return this.wait(50).then(function () {
+	  return this.wait(duration).then(function () {
 	    var e = self.fireEvent('touchend', self.clientX, self.clientY)
 	    self.started = false
 	    self.emit('end')
@@ -503,11 +519,12 @@
 	 * @api public
 	 */
 	TouchSimulate.prototype.wait = function (n) {
-	  return new Promise(function (resolve) {
+	  var promise = this.createPromise(function (resolve) {
 	    setTimeout(function () {
 	      resolve()
 	    }, n)
 	  })
+	  return promise
 	}
 	
 	/**
@@ -517,7 +534,7 @@
 	 * @param {Object} end
 	 * @api public
 	 */
-	TouchSimulate.prototype.transit = function (end) {
+	TouchSimulate.prototype.transit = function (end, up) {
 	  var self = this
 	  this.moving = true
 	  var start = {x: this.clientX, y: this.clientY}
@@ -534,12 +551,14 @@
 	    self.emit('move', o.x, o.y)
 	  })
 	
-	  var promise = new Promise(function (resolve) {
+	  var promise = this.createPromise(function (resolve) {
 	    tween.on('end', function(){
 	      self.moving = false
 	      self.started = false
-	      var e = self.fireEvent('touchend', self.clientX, self.clientY)
-	      self.emit('end')
+	      if (up !== false) {
+	        var e = self.fireEvent('touchend', self.clientX, self.clientY)
+	        self.emit('end')
+	      }
 	      animate = function(){} // eslint-disable-line
 	      resolve(e)
 	    })
@@ -579,8 +598,14 @@
 	 * @api public
 	 */
 	TouchSimulate.prototype.fireEvent = function (type, x, y) {
-	  var e = createEvent(this.el, type, x, y)
-	  this.el.dispatchEvent(e)
+	  var e = createEvent(type, x, y)
+	  var target
+	  if (this.fixTarget) {
+	    target = document.elementFromPoint(x, y)
+	  } else {
+	    target = this.el
+	  }
+	  target.dispatchEvent(e)
 	  return e
 	}
 	
@@ -623,6 +648,35 @@
 	    s[transform] = 'translateX(' + x + 'px),translateY(' + y + 'px)'
 	  }
 	}
+	
+	/**
+	 * Create a decorater for TouchSimulate
+	 *
+	 * @param  {Function}  fn
+	 * @return {Promise}
+	 * @api private
+	 */
+	TouchSimulate.prototype.createPromise = function (fn) {
+	  var promise = new Promise(fn)
+	  var names = ['start', 'moveUp', 'moveDown', 'moveLeft', 'moveRight', 'moveTo', 'move', 'wait']
+	  var self = this
+	  names.forEach(function (name) {
+	    promise[name] = function () {
+	      var args = arguments
+	      return self.createPromise(function (resolve, reject) {
+	        promise.then(function () {
+	          try {
+	            var p = self[name].apply(self, args)
+	          } catch (err) {
+	            return reject(err)
+	          }
+	          resolve(p)
+	        })
+	      })
+	    }
+	  })
+	  return promise
+	}
 	/**
 	 * Get coordinate by element and position string
 	 *
@@ -635,19 +689,22 @@
 	  var rect = el.getBoundingClientRect()
 	  var x = rect.left
 	  var y = rect.top
+	  var delta = 3
 	  switch (position) {
 	    case 't':
 	      x = x + rect.width/2
+	      y = y + delta
 	      break;
 	    case 'b':
 	      x = x + rect.width/2
-	      y = y + rect.height
+	      y = y + rect.height - delta
 	      break;
 	    case 'l':
 	      y = y + rect.height/2
+	      x = x + delta
 	      break;
 	    case 'r':
-	      x = x + rect.widht
+	      x = x + rect.widht - delta
 	      y = y + rect.height/2
 	      break;
 	    default:

@@ -6,34 +6,20 @@ var el = document.getElementById('demo')
 var m = moveable(el)
 
 var touch = new TouchSimulate(el, {
-  speed: 80,
-  point: true
+  speed: 80
 })
 
 function run() {
   touch.start()
-  touch.moveRight(150)
-  .then(function () {
-    return touch.wait(1000)
-  })
-  .then(function () {
-    return touch.moveDown(150)
-  })
-  .then(function () {
-    return touch.wait(1000)
-  })
-  .then(function () {
-    return touch.moveLeft(150)
-  })
-  .then(function () {
-    return touch.wait(1000)
-  })
-  .then(function () {
-    return touch.moveUp(150)
-  })
-  .then(function () {
-    return touch.move(Math.PI/4, 150)
-  })
+  .moveRight(150, false)
+  .wait(1000)
+  .moveDown(150, false)
+  .wait(1000)
+  .moveLeft(150, false)
+  .wait(1000)
+  .moveUp(150, false)
+  .move(Math.PI/4, 150)
+  .wait(1000)
   .then(function () {
     m.reset()
     return touch.wait(1000)
@@ -78,9 +64,10 @@ function moveable(node) {
 
   return {
     reset: function () {
+      var top = window.scrollY
       x = 0,
-      y = 0,
-      node.style[transform] = ''
+      y = top,
+      node.style[transform] = 'translate3d(' + x + 'px,' + y + 'px, 0)'
     }
   }
 }
