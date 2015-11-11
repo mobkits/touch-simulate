@@ -376,7 +376,7 @@ TouchSimulate.prototype.movePoint = function (x, y) {
 }
 
 /**
- * Create a decorater for TouchSimulate
+ * Create a decorater promise for chain
  *
  * @param  {Function}  fn
  * @return {Promise}
@@ -397,6 +397,8 @@ TouchSimulate.prototype.createPromise = function (fn) {
             return reject(err)
           }
           resolve(p)
+        }, function (e) {
+          throw e
         })
       })
     }
