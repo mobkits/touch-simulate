@@ -121,7 +121,10 @@ TouchSimulate.prototype.start = function (pos) {
   if (this.moving) throw new Error('It\'s moving, can not start')
   this.started = true
   var cor
-  if (pos === true && this.clientX != null && this.clientY != null) {
+  if (Array.isArray(pos)) {
+    cor = {x: pos[0], y: pos[1]}
+  }
+  else if (pos === true && this.clientX != null && this.clientY != null) {
     cor = {x: this.clientX, y: this.clientY}
   } else {
     cor = getCoordinate(this.el, pos)
