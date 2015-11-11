@@ -67,7 +67,6 @@ Set the ease function name
 Set the touch start el and optional position(default is center)
 position could be `t` `l` `r` `b` for alias for top, left, right and bottom
 position could also be an array, which contains [x, y] for clientX and clientY
-This function would throw error if the movemonent not finished
 
 #### .moveUp(distance, [end])
 #### .moveDown(distance, [end])
@@ -80,8 +79,8 @@ If `end` is set to false, no touchend event is fired.
 
 #### .moveTo(x, y, [end])
 
-Insread of move direction, set move monent destination,
-x and y are clientX and clientY (relative to viewport, regardless of scrollbar)
+Instead of move direction, set move destination,
+x and y are clientX and clientY (relative to viewport)
 
 #### .move(angel, distance, [end])
 
