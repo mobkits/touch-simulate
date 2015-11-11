@@ -1,3 +1,7 @@
+# 0.1.0
+* Use enhanced promise for chainable
+* Touchstart fired on the previous position when move method calls again
+
 # 0.0.8
 * add up param to control touchend event
 
