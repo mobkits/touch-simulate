@@ -50,7 +50,6 @@
     "component-emitter": "^1.2.0",
     "component-raf": "^1.2.0",
     "component-tween": "^1.2.0",
-    "inherits": "^2.0.1",
     "prop-detect": "^1.0.0"
   },
   "browser": {
